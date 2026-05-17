@@ -1,0 +1,146 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://Scripts/SerialReader.cs" id="1_sr"]
+[ext_resource type="Script" path="res://Scripts/AttitudeController.cs" id="2_ac"]
+[ext_resource type="Script" path="res://Scripts/HUDController.cs" id="3_hc"]
+[ext_resource type="Script" path="res://Scripts/ArtificialHorizon.cs" id="4_ah"]
+[ext_resource type="Script" path="res://Scripts/CompassRose.cs" id="5_cr"]
+[ext_resource type="Script" path="res://Scripts/HeadingTape.cs" id="6_ht"]
+[ext_resource type="Script" path="res://Scripts/PitchTape.cs" id="7_pt"]
+[ext_resource type="Script" path="res://Scripts/GMeter.cs" id="8_gm"]
+[ext_resource type="PackedScene" path="res://Models/source/JetFighter.glb" id="9_jf"]
+[ext_resource type="Shader" path="res://Shaders/grid_fade.gdshader" id="10_sh"]
+[ext_resource type="Texture2D" path="res://Textures/background.jpg" id="11_bg"]
+
+[sub_resource type="Environment" id="Environment_bg"]
+background_mode = 3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_grid"]
+render_priority = 0
+shader = ExtResource("10_sh")
+shader_parameter/grid_color = Color(0.5, 0.5, 0.5, 1)
+shader_parameter/grid_step = 1.0
+shader_parameter/line_thickness = 0.05
+shader_parameter/fade_distance = 50.0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_grid"]
+material = SubResource("ShaderMaterial_grid")
+size = Vector2(100, 100)
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_bg")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Background" type="TextureRect" parent="BackgroundLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.5, 0, 0.353553, 0.612372, 0.707107, -0.353553, -0.612372, 0.707107, 0, 5, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 2, 7)
+
+[node name="SerialReader" type="Node" parent="."]
+script = ExtResource("1_sr")
+PortName = "COM5"
+BaudRate = 115200
+
+[node name="Vehicle" type="Node3D" parent="." node_paths=PackedStringArray("reader")]
+script = ExtResource("2_ac")
+reader = NodePath("../SerialReader")
+showBodyAxes = true
+
+[node name="JetFighter" parent="Vehicle" instance=ExtResource("9_jf")]
+transform = Transform3D(-2.18557e-09, 0, 0.05, 0, 0.05, 0, -0.05, 0, -2.18557e-09, 0, 0, 0)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HeadingTape" type="Control" parent="HUD" node_paths=PackedStringArray("attitudeController")]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+script = ExtResource("6_ht")
+attitudeController = NodePath("../../Vehicle")
+
+[node name="PitchTape" type="Control" parent="HUD" node_paths=PackedStringArray("attitudeController")]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_top = 48.0
+offset_right = 56.0
+grow_vertical = 2
+script = ExtResource("7_pt")
+attitudeController = NodePath("../../Vehicle")
+
+[node name="HUDController" type="Control" parent="HUD" node_paths=PackedStringArray("reader", "attitudeController")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_hc")
+reader = NodePath("../../SerialReader")
+attitudeController = NodePath("../../Vehicle")
+
+[node name="ArtificialHorizon" type="Control" parent="HUD" node_paths=PackedStringArray("attitudeController")]
+tooltip_text = "Horizonte Artificial (ADI). Mostra roll (rotação do disco) e pitch (deslocamento vertical do horizonte). Azul = céu, marrom = terra."
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 68.0
+offset_top = -176.0
+offset_right = 228.0
+offset_bottom = -16.0
+grow_vertical = 0
+script = ExtResource("4_ah")
+attitudeController = NodePath("../../Vehicle")
+
+[node name="CompassRose" type="Control" parent="HUD" node_paths=PackedStringArray("attitudeController")]
+tooltip_text = "Rosa dos Ventos. Disco rotaciona com o yaw do veículo. O ponteiro vermelho fixo indica o rumo atual em relação à referência inicial."
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -156.0
+offset_right = 70.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("5_cr")
+attitudeController = NodePath("../../Vehicle")
+
+[node name="GMeter" type="Control" parent="HUD" node_paths=PackedStringArray("reader")]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -136.0
+offset_top = -136.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("8_gm")
+reader = NodePath("../../SerialReader")
