@@ -14,21 +14,21 @@ O projeto é dividido em dois subprojetos trabalhando em sincronia através de u
 ```mermaid
 graph TD
     subgraph "Hardware (M5StickC Plus 2)"
-        A[IMU 6DOF\nAcel.\n+ Giroscóp.] --> B(Filtro Madgwick\nCálculo de Quaternions)
-        B --> C{Usuário solicitou\nzerar referência?}
-        C -- Sim --> D[Zera Quaternion]
-        C -- Não --> E[Atualiza Quaternion]
+        A["IMU 6DOF<br>Acel.<br>+ Giroscóp."] --> B("Filtro Madgwick<br>Cálculo de Quaternions")
+        B --> C{"Usuário solicitou<br>zerar referência?"}
+        C -- Sim --> D["Zera Quaternion"]
+        C -- Não --> E["Atualiza Quaternion"]
         D --> F
-        E --> F[Comunicação Serial\nTaxa: 115200 kbps]
-        X[Botões GPIO 37, 39\nA e B] --> C
+        E --> F["Comunicação Serial<br>Taxa: 115200 kbps"]
+        X["Botões GPIO 37, 39\nA e B"] --> C
     end
 
     subgraph "Host / PC (Godot 4 + C#)"
-        F -->|Protocolo CSV:\nqW, qX, qY, qZ, aX, aY, aZ| G[SerialReader.cs\nThread Assíncrona]
-        G --> H[AttitudeController.cs\nConversão de Sistema de Coordenadas\n+ Suavização SLERP]
-        H --> J[Manipulação Rotação\nModelo 3D (Avião)]
-        H --> I[Extrator de Graus Euler\nPitch, Roll, Yaw]
-        I --> K[HUDController.cs\nHorizonte Artificial, Bússola,\nG-Meter, Fitas de Pitch/Heading]
+        F -->|"Protocolo CSV:\nqW, qX, qY, qZ, aX, aY, aZ"| G[SerialReader.cs<br>Thread Assíncrona]
+        G --> H["AttitudeController.cs<br>Conversão de Sistema de Coordenadas<br>+ Suavização SLERP"]
+        H --> J["Manipulação Rotação<br>Modelo 3D (Avião)"]
+        H --> I["Extrator de Graus Euler<br>Pitch, Roll, Yaw"]
+        I --> K["HUDController.cs<br>Horizonte Artificial, Bússola,<br>G-Meter, Fitas de Pitch/Heading"]
         G -->|Aceleração Bruta| K
     end
 ```
